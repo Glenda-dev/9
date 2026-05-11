@@ -1,0 +1,78 @@
+#[derive(Debug)]
+pub enum Plan9Syscall {
+    SysR1 = 0,
+    Errstr = 1,
+    Bind = 2,
+    Chdir = 3,
+    Close = 4,
+    Dup = 5,
+    Alarm = 6,
+    Exec = 7,
+    Exits = 8,
+    Fauth = 10,
+    Segbrk = 12,
+    Mount = 13,
+    Open = 14,
+    Read = 15,
+    Sleep = 17,
+    Rfork = 19,
+    Write = 20,
+    Pipe = 21,
+    Create = 22,
+    Fd2path = 23,
+    Brk = 24,
+    Remove = 25,
+    Seek = 39,
+    Fversion = 40,
+    Stat = 42,
+    Fstat = 43,
+    Wstat = 44,
+    Fwstat = 45,
+    Pread = 50,
+    Pwrite = 51,
+    Nsec = 53,
+    Unknown,
+}
+
+pub mod fs;
+pub mod ns;
+pub mod task;
+
+impl From<usize> for Plan9Syscall {
+    fn from(n: usize) -> Self {
+        match n {
+            0 => Self::SysR1,
+            1 => Self::Errstr,
+            2 => Self::Bind,
+            3 => Self::Chdir,
+            4 => Self::Close,
+            5 => Self::Dup,
+            6 => Self::Alarm,
+            7 => Self::Exec,
+            8 => Self::Exits,
+            10 => Self::Fauth,
+            12 => Self::Segbrk,
+            13 => Self::Mount,
+            14 => Self::Open,
+            15 => Self::Read,
+            17 => Self::Sleep,
+            19 => Self::Rfork,
+            20 => Self::Write,
+            21 => Self::Pipe,
+            22 => Self::Create,
+            23 => Self::Fd2path,
+            24 => Self::Brk,
+            25 => Self::Remove,
+            39 => Self::Seek,
+            40 => Self::Fversion,
+            42 => Self::Stat,
+            43 => Self::Fstat,
+            44 => Self::Wstat,
+            45 => Self::Fwstat,
+            50 => Self::Pread,
+            51 => Self::Pwrite,
+            53 => Self::Nsec,
+            _ => Self::Unknown,
+        }
+    }
+}

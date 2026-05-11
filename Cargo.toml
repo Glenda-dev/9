@@ -1,0 +1,16 @@
+[package]
+name = "nine"
+description = "Plan 9 Environment for Glenda Microkernel"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libglenda-rs = { path = "../../lib/libglenda-rs", features = [
+    "rt-service",
+    "vspacemgr_check_bypass",
+] }
+serde = { version = "1.0", default-features = false, features = [
+    "derive",
+    "alloc",
+] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
