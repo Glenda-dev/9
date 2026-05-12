@@ -30,11 +30,11 @@ impl ExecHeader {
         header.entry = u32::from_be_bytes([buf[20], buf[21], buf[22], buf[23]]);
         header.spsz = u32::from_be_bytes([buf[24], buf[25], buf[26], buf[27]]);
         header.pcsz = u32::from_be_bytes([buf[28], buf[29], buf[30], buf[31]]);
-        
+
         if header.magic != R_MAGIC {
             return Err(Error::InvalidType);
         }
-        
+
         Ok(header)
     }
 }

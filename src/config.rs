@@ -30,10 +30,7 @@ pub struct NineConfig {
 
 impl Default for NineConfig {
     fn default() -> Self {
-        Self {
-            init_path: default_init_path(),
-            root_partition: default_root_partition(),
-        }
+        Self { init_path: default_init_path(), root_partition: default_root_partition() }
     }
 }
 

@@ -15,19 +15,20 @@ mod task;
 
 use alloc::boxed::Box;
 use glenda::cap::{
-    CSPACE_CAP, CapType, ENDPOINT_CAP, ENDPOINT_SLOT, MONITOR_CAP, RECV_SLOT, REPLY_SLOT, VSPACE_CAP,
+    CSPACE_CAP, CapType, ENDPOINT_CAP, ENDPOINT_SLOT, MONITOR_CAP, RECV_SLOT, REPLY_SLOT,
+    VSPACE_CAP,
 };
 use glenda::client::{
     AuthClient, FsClient, InitClient, ProcessClient, ResourceClient, TimeClient,
     VirtualTerminalClient, VolumeClient,
 };
+use glenda::interface::{CSpaceService, ResourceService, SystemService};
 use glenda::ipc::Badge;
 use glenda::protocol::resource::{
-    FS_ENDPOINT, INIT_ENDPOINT, ResourceType, TIME_ENDPOINT, VOLUME_ENDPOINT, VT_ENDPOINT,
-    FACTOTUM_ENDPOINT,
+    FACTOTUM_ENDPOINT, FS_ENDPOINT, INIT_ENDPOINT, ResourceType, TIME_ENDPOINT, VOLUME_ENDPOINT,
+    VT_ENDPOINT,
 };
 use glenda::runtime::{RuntimeThreadConfig, init_current_thread};
-use glenda::interface::{CSpaceService, ResourceService, SystemService};
 use glenda::utils::manager::{CSpaceManager, VSpaceManager};
 use layout::*;
 use nine::NineManager;
@@ -49,32 +50,62 @@ fn main() -> usize {
 
     // Request endpoints from resource monitor
     res_client
-        .get_cap(Badge::null(), ResourceType::Endpoint, INIT_ENDPOINT, glenda::cap::CapPtr::from(INIT_SLOT))
+        .get_cap(
+            Badge::null(),
+            ResourceType::Endpoint,
+            INIT_ENDPOINT,
+            glenda::cap::CapPtr::from(INIT_SLOT),
+        )
         .expect("Failed to get init endpoint");
     let init_client = Box::leak(Box::new(InitClient::new(INIT_CAP)));
 
     res_client
-        .get_cap(Badge::null(), ResourceType::Endpoint, FS_ENDPOINT, glenda::cap::CapPtr::from(FS_SLOT))
+        .get_cap(
+            Badge::null(),
+            ResourceType::Endpoint,
+            FS_ENDPOINT,
+            glenda::cap::CapPtr::from(FS_SLOT),
+        )
         .expect("Failed to get fs endpoint");
     let fs_client = Box::leak(Box::new(FsClient::new(FS_CAP)));
 
     res_client
-        .get_cap(Badge::null(), ResourceType::Endpoint, VOLUME_ENDPOINT, glenda::cap::CapPtr::from(VOLUME_SLOT))
+        .get_cap(
+            Badge::null(),
+            ResourceType::Endpoint,
+            VOLUME_ENDPOINT,
+            glenda::cap::CapPtr::from(VOLUME_SLOT),
+        )
         .expect("Failed to get volume endpoint");
     let vol_client = Box::leak(Box::new(VolumeClient::new_simple(VOLUME_CAP, res_client)));
 
     res_client
-        .get_cap(Badge::null(), ResourceType::Endpoint, VT_ENDPOINT, glenda::cap::CapPtr::from(VT_SLOT))
+        .get_cap(
+            Badge::null(),
+            ResourceType::Endpoint,
+            VT_ENDPOINT,
+            glenda::cap::CapPtr::from(VT_SLOT),
+        )
         .expect("Failed to get vt endpoint");
     let vt_client = Box::leak(Box::new(VirtualTerminalClient::new(VT_CAP)));
 
     res_client
-        .get_cap(Badge::null(), ResourceType::Endpoint, TIME_ENDPOINT, glenda::cap::CapPtr::from(TIME_SLOT))
+        .get_cap(
+            Badge::null(),
+            ResourceType::Endpoint,
+            TIME_ENDPOINT,
+            glenda::cap::CapPtr::from(TIME_SLOT),
+        )
         .expect("Failed to get time endpoint");
     let time_client = Box::leak(Box::new(TimeClient::new(TIME_CAP)));
 
     res_client
-        .get_cap(Badge::null(), ResourceType::Endpoint, FACTOTUM_ENDPOINT, glenda::cap::CapPtr::from(AUTH_SLOT))
+        .get_cap(
+            Badge::null(),
+            ResourceType::Endpoint,
+            FACTOTUM_ENDPOINT,
+            glenda::cap::CapPtr::from(AUTH_SLOT),
+        )
         .expect("Failed to get factotum endpoint");
     let auth_client = Box::leak(Box::new(AuthClient::new(AUTH_CAP)));
 
@@ -85,7 +116,12 @@ fn main() -> usize {
 
     // Register Nine endpoint to monitor
     res_client
-        .register_cap(Badge::null(), ResourceType::Endpoint, glenda::protocol::resource::NINE_ENDPOINT, ENDPOINT_SLOT)
+        .register_cap(
+            Badge::null(),
+            ResourceType::Endpoint,
+            glenda::protocol::resource::NINE_ENDPOINT,
+            ENDPOINT_SLOT,
+        )
         .expect("Failed to register Nine endpoint");
 
     // Initialize runtime for this thread

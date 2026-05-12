@@ -1,8 +1,8 @@
+use crate::layout::{USTKSIZE, USTKTOP};
 use alloc::collections::BTreeMap;
 use glenda::cap::{CapPtr, VSpace};
 use glenda::mem::Perms;
 use glenda::sync::rwlock::RwLock;
-use crate::layout::{USTKTOP, USTKSIZE};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MemoryType {
@@ -53,7 +53,8 @@ impl MmStruct {
     }
 
     pub fn lookup_memory_map(&self, vaddr: usize) -> Option<MemoryMap> {
-        self.state.read()
+        self.state
+            .read()
             .memory_maps
             .range(..=vaddr)
             .next_back()

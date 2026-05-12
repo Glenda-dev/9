@@ -1,11 +1,11 @@
 use crate::nine::NineManager;
-use glenda::error::Error;
-use glenda::mem::Perms;
-use glenda::interface::VSpaceService;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::cmp::min;
 use core::mem::size_of;
+use glenda::error::Error;
+use glenda::interface::VSpaceService;
+use glenda::mem::Perms;
 
 pub struct UserAccessSession<'a, 'b> {
     pub mgr: &'a mut NineManager<'b>,
@@ -34,20 +34,22 @@ impl<'a, 'b> UserAccessSession<'a, 'b> {
             }
             let offset = cursor - map.vaddr;
             let chunk = min(map.size - offset, dst.len() - copied);
-            
+
             // Map scratch and copy
             let frame = glenda::cap::Page::from(glenda::cap::CapPtr::from(map.frame_cap));
             let scratch = self.mgr.vspace_mgr.map_scratch(
-                frame, 
-                Perms::READ, 
-                1, 
-                &mut *self.mgr.res_client, 
-                &mut *self.mgr.cspace_mgr
+                frame,
+                Perms::READ,
+                1,
+                &mut *self.mgr.res_client,
+                &mut *self.mgr.cspace_mgr,
             )?;
-            
-            let src_slice = unsafe { core::slice::from_raw_parts((scratch + (offset % 4096)) as *const u8, chunk) };
+
+            let src_slice = unsafe {
+                core::slice::from_raw_parts((scratch + (offset % 4096)) as *const u8, chunk)
+            };
             dst[copied..copied + chunk].copy_from_slice(src_slice);
-            
+
             let _ = self.mgr.vspace_mgr.unmap(scratch, 1);
             copied += chunk;
         }
@@ -66,19 +68,21 @@ impl<'a, 'b> UserAccessSession<'a, 'b> {
             }
             let offset = cursor - map.vaddr;
             let chunk = min(map.size - offset, src.len() - copied);
-            
+
             let frame = glenda::cap::Page::from(glenda::cap::CapPtr::from(map.frame_cap));
             let scratch = self.mgr.vspace_mgr.map_scratch(
-                frame, 
-                Perms::READ | Perms::WRITE, 
-                1, 
-                &mut *self.mgr.res_client, 
-                &mut *self.mgr.cspace_mgr
+                frame,
+                Perms::READ | Perms::WRITE,
+                1,
+                &mut *self.mgr.res_client,
+                &mut *self.mgr.cspace_mgr,
             )?;
-            
-            let dst_slice = unsafe { core::slice::from_raw_parts_mut((scratch + (offset % 4096)) as *mut u8, chunk) };
+
+            let dst_slice = unsafe {
+                core::slice::from_raw_parts_mut((scratch + (offset % 4096)) as *mut u8, chunk)
+            };
             dst_slice.copy_from_slice(&src[copied..copied + chunk]);
-            
+
             let _ = self.mgr.vspace_mgr.unmap(scratch, 1);
             copied += chunk;
         }

@@ -1,10 +1,10 @@
 use crate::nine::mm::MmStruct;
+use alloc::collections::BTreeMap;
+use alloc::string::String;
 use alloc::sync::Arc;
 use glenda::cap::{CapPtr, VSpace};
 use glenda::client::FsClient;
-use alloc::collections::BTreeMap;
 use glenda::sync::rwlock::RwLock;
-use alloc::string::String;
 
 #[derive(Debug, Clone)]
 pub struct FileHandle {
@@ -25,23 +25,13 @@ pub struct FilesStruct {
 
 impl FilesStruct {
     pub fn new() -> Self {
-        Self {
-            state: RwLock::new(FilesState {
-                fds: BTreeMap::new(),
-                next_fd: 0,
-            }),
-        }
+        Self { state: RwLock::new(FilesState { fds: BTreeMap::new(), next_fd: 0 }) }
     }
 
     pub fn open(&self, fs_client: FsClient, fs_ep_slot: CapPtr, path: String) -> u32 {
         let mut state = self.state.write();
         let fd = state.next_fd;
-        state.fds.insert(fd, FileHandle {
-            fs_client,
-            fs_ep_slot,
-            offset: 0,
-            path,
-        });
+        state.fds.insert(fd, FileHandle { fs_client, fs_ep_slot, offset: 0, path });
         state.next_fd += 1;
         fd
     }
@@ -83,9 +73,7 @@ pub struct TaskRegistry {
 
 impl TaskRegistry {
     pub fn new() -> Self {
-        Self {
-            tasks: BTreeMap::new(),
-        }
+        Self { tasks: BTreeMap::new() }
     }
 
     pub fn register(&mut self, task: Arc<Task>) {

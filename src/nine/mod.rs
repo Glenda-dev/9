@@ -1,3 +1,4 @@
+use crate::config::NineConfig;
 use glenda::cap::{CapPtr, Endpoint, Reply, TCB, TCB_SLOT, VSPACE_SLOT};
 use glenda::client::{
     AuthClient, FsClient, InitClient, ProcessClient, ResourceClient, TimeClient,
@@ -11,7 +12,6 @@ use glenda::interface::{
 use glenda::ipc::{Badge, MsgArgs, UTCB};
 use glenda::protocol;
 use glenda::utils::manager::{CSpaceManager, VSpaceManager};
-use crate::config::NineConfig;
 
 pub mod mm;
 pub mod task;
@@ -154,36 +154,34 @@ impl<'a> NineManager<'a> {
         let syscall = crate::syscall::Plan9Syscall::from(sys_num);
         debug!("Nine: Syscall from pid {}: {:?} (num={}), sp={:#x}", pid, syscall, sys_num, sp);
 
-        let ret = self.with_user_session(pid, |sess| {
-            match syscall {
-                crate::syscall::Plan9Syscall::Open => sess.sys_open(sp),
-                crate::syscall::Plan9Syscall::Read => sess.sys_read(sp),
-                crate::syscall::Plan9Syscall::Write => sess.sys_write(sp),
-                crate::syscall::Plan9Syscall::Pread => sess.sys_pread(sp),
-                crate::syscall::Plan9Syscall::Pwrite => sess.sys_pwrite(sp),
-                crate::syscall::Plan9Syscall::Seek => sess.sys_seek(sp),
-                crate::syscall::Plan9Syscall::Close => sess.sys_close(sp),
-                crate::syscall::Plan9Syscall::Brk => sess.sys_brk(sp),
-                crate::syscall::Plan9Syscall::Rfork => sess.sys_rfork(sp),
-                crate::syscall::Plan9Syscall::Stat => sess.sys_stat(sp),
-                crate::syscall::Plan9Syscall::Fstat => sess.sys_fstat(sp),
-                crate::syscall::Plan9Syscall::Fd2path => sess.sys_fd2path(sp),
-                crate::syscall::Plan9Syscall::Bind => sess.sys_bind(sp),
-                crate::syscall::Plan9Syscall::Mount => sess.sys_mount(sp),
-                crate::syscall::Plan9Syscall::Exits => {
-                    let msg_ptr = sess.read_user_usize(sp + 8)?;
-                    if msg_ptr != 0 {
-                        let msg = sess.strncpy_from_user(msg_ptr, 128)?;
-                        log!("Nine: pid {} exiting with msg: {}", pid, msg);
-                    } else {
-                        log!("Nine: pid {} exiting", pid);
-                    }
-                    Ok(0)
+        let ret = self.with_user_session(pid, |sess| match syscall {
+            crate::syscall::Plan9Syscall::Open => sess.sys_open(sp),
+            crate::syscall::Plan9Syscall::Read => sess.sys_read(sp),
+            crate::syscall::Plan9Syscall::Write => sess.sys_write(sp),
+            crate::syscall::Plan9Syscall::Pread => sess.sys_pread(sp),
+            crate::syscall::Plan9Syscall::Pwrite => sess.sys_pwrite(sp),
+            crate::syscall::Plan9Syscall::Seek => sess.sys_seek(sp),
+            crate::syscall::Plan9Syscall::Close => sess.sys_close(sp),
+            crate::syscall::Plan9Syscall::Brk => sess.sys_brk(sp),
+            crate::syscall::Plan9Syscall::Rfork => sess.sys_rfork(sp),
+            crate::syscall::Plan9Syscall::Stat => sess.sys_stat(sp),
+            crate::syscall::Plan9Syscall::Fstat => sess.sys_fstat(sp),
+            crate::syscall::Plan9Syscall::Fd2path => sess.sys_fd2path(sp),
+            crate::syscall::Plan9Syscall::Bind => sess.sys_bind(sp),
+            crate::syscall::Plan9Syscall::Mount => sess.sys_mount(sp),
+            crate::syscall::Plan9Syscall::Exits => {
+                let msg_ptr = sess.read_user_usize(sp + 8)?;
+                if msg_ptr != 0 {
+                    let msg = sess.strncpy_from_user(msg_ptr, 128)?;
+                    log!("Nine: pid {} exiting with msg: {}", pid, msg);
+                } else {
+                    log!("Nine: pid {} exiting", pid);
                 }
-                _ => {
-                    warn!("Nine: Unimplemented syscall: {:?}", syscall);
-                    Err(Error::NotSupported)
-                }
+                Ok(0)
+            }
+            _ => {
+                warn!("Nine: Unimplemented syscall: {:?}", syscall);
+                Err(Error::NotSupported)
             }
         });
 
